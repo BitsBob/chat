@@ -189,7 +189,6 @@ void handle_client(int client_socket) {
         if (it != logged_in_users.end()) {
             partner_name = it->second;
         } else {
-            // This should not happen if logic is correct, but safe check
             partner_name = "Unknown Partner (FD: " + std::to_string(partner_socket) + ")"; 
         }
     }
@@ -294,7 +293,6 @@ int main() {
         }
     }
 
-    //  Theoretically unreachable
     close(server_fd); 
     
     return 0;

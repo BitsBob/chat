@@ -33,7 +33,6 @@ void receive_handler(int client_socket) {
 
         if (valread > 0) {
             buffer[valread] = '\0';
-            // Use cerr to print to avoid mixing with cin/cout buffering,
             std::cerr << "\n" << buffer << "\n> ";
             std::cerr.flush();
         } else if (valread == 0) {
@@ -57,7 +56,6 @@ int main() {
     char buffer[1024] = {0};
     ssize_t valread;
     
-    // --- Connection Setup (Steps 1, 2, 3) ---
     if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("Client socket creation failed");
         return EXIT_FAILURE;
@@ -79,7 +77,6 @@ int main() {
 
     std::cout << "Successfully connected to server." << std::endl;
 
-    // --- Step 4a: Receive initial greeting/login prompt ---
     valread = recv(client_fd, buffer, 1024 - 1, 0);
 
     if (valread > 0) {
@@ -91,17 +88,13 @@ int main() {
         return 0;
     }
 
-    // --- Step 5: Start the Receiver Thread ---
     std::thread receiver_thread(receive_handler, client_fd);
 
-    // --- Step 6: Input/Sender Loop (Main Thread) ---
     while (keep_running.load()) {
         std::cout << "> ";
         std::string input_message;
         
-        // This blocks until the user presses Enter
         if (!std::getline(std::cin, input_message)) {
-            // If getline fails (e.g., EOF, Ctrl+D), exit.
             keep_running.store(false); 
             break;
         }
@@ -123,10 +116,8 @@ int main() {
         }
     }
     
-    // --- Step 7: Cleanup ---
     shutdown(client_fd, SHUT_RDWR); 
     
-    // Wait for the receiver thread to finish its cleanup
     if (receiver_thread.joinable()) {
         receiver_thread.join();
     }
